@@ -14,7 +14,7 @@ import {
 import {useRouter} from "next/navigation";
 import NavItems from "@/components/NavItems";
 
-const userDropdown = () => {
+const UserDropdown = () => {
     const router = useRouter()
 
     const handleSignOut = async () => {
@@ -71,4 +71,4 @@ const userDropdown = () => {
     )
 }
 
-export default userDropdown
+export default UserDropdown
