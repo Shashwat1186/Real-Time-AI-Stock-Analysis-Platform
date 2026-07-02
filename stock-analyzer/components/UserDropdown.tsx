@@ -14,7 +14,7 @@ import {
 import {useRouter} from "next/navigation";
 import NavItems from "@/components/NavItems";
 
-const userDropdown = () => {
+const UserDropdown = () => {
     const router = useRouter()
 
     const handleSignOut = async () => {
@@ -26,7 +26,7 @@ const userDropdown = () => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-3 text-gray-4 hover:text-yellow-500">
+                <Button variant="ghost" className="flex items-center gap-3 text-gray-400 hover:text-yellow-500">
                     <Avatar>
                         <AvatarImage src="https://github.com/shadcn.png" />
                         <AvatarFallback className="bg-yellow-500 text-yellow-900 text-sm font-bold">
@@ -71,4 +71,4 @@ const userDropdown = () => {
     )
 }
 
-export default userDropdown
+export default UserDropdown
