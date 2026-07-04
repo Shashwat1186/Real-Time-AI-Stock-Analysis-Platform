@@ -1,11 +1,11 @@
 'use client';
 
-import {useForm} from "react-hook-form";
-import {Button} from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import InputField from "@/components/forms/InputField";
 import SelectField from "@/components/forms/SelectField";
-import {INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS} from "@/lib/constants";
-import {CountrySelectField} from "@/components/forms/CountrySelectField";
+import { INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS } from "@/lib/constants";
+import { CountrySelectField } from "@/components/forms/CountrySelectField";
 import FooterLink from "@/components/forms/FooterLink";
 
 const SignUp = () => {
@@ -25,7 +25,7 @@ const SignUp = () => {
             preferredIndustry: 'Technology'
         },
         mode: 'onBlur'
-    }, );
+    },);
 
     const onSubmit = async (data: SignUpFormData) => {
         try {
@@ -71,7 +71,7 @@ const SignUp = () => {
                 <CountrySelectField
                     name="country"
                     label="Country"
-                    control = {control}
+                    control={control}
                     error={errors.country}
                     required
                 />
