@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
@@ -12,15 +13,17 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useRouter } from "next/navigation";
 import NavItems from "@/components/NavItems";
+import { signOut } from "@/lib/actions/auth.actions";
 
-const UserDropdown = () => {
+const UserDropdown = ({ user }: { user: User }) => {
     const router = useRouter()
 
     const handleSignOut = async () => {
+        await signOut();
         router.push("/sign-in")
     }
 
-    const user = { name: 'John', email: 'john@gmail.com' }
+    //const user = { name: 'John', email: 'john@gmail.com' }
 
     return (
         <DropdownMenu>

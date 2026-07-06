@@ -1,0 +1,59 @@
+'use server'
+import { auth } from '@/lib/better-auth/auth'
+import { inngest } from "@/lib/inngest/client"
+import { revalidatePath } from 'next/cache'
+
+export const signUpWithEmail = async ({ email, password, fullName, country, investmentGoals, riskTolerance, preferredIndustry }: SignUpFormData) => {
+
+    try {
+        const response = await auth.api.signUpEmail({
+            body: { email, password, name: fullName }
+        })
+        if (response) {
+            await inngest.send({
+                name: 'app/user.created',
+                data: {
+                    email,
+                    name: fullName,
+                    country,
+                    investmentGoals,
+                    riskTolerance,
+                    preferredIndustry
+                }
+            })
+            revalidatePath('/')
+        }
+        return { success: true, data: response }
+    }
+    catch (e) {
+        console.log('Sign up failed', e)
+        return { success: false, error: 'Sign up failed' }
+    }
+}
+
+export const signOut = async () => {
+    try {
+        const { headers } = await import("next/headers");
+        await auth.api.signOut({ headers: await headers() })
+    }
+    catch (e) {
+        console.log('Sign Out failed', e);
+        return { success: false, error: 'Sign Out failed' }
+    }
+}
+
+export const signInWithEmail = async ({ email, password }: SignInFormData) => {
+    try {
+        const { headers } = await import("next/headers");
+        const response = await auth.api.signInEmail({
+            body: { email, password },
+            headers: await headers()
+        })
+
+        return { success: true, data: response }
+    }
+    catch (e: any) {
+        console.log('Sign in failed', e)
+        return { success: false, error: e?.message || 'Sign in failed' }
+    }
+}
