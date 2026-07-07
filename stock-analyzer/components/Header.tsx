@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import NavItems from "@/components/NavItems";
 import UserDropdown from "@/components/UserDropdown";
+import SearchCommand from "@/components/SearchCommand";
 
 const Header = ({ user }: { user: User }) => {
     return (
@@ -14,6 +15,7 @@ const Header = ({ user }: { user: User }) => {
                     <NavItems />
                 </nav>
                 <UserDropdown user={user} />
+                <SearchCommand renderAs="dialog-only" />
             </div>
         </header>
     )

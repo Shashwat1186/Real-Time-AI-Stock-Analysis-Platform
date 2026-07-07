@@ -17,9 +17,8 @@ const NavItems = () => {
                 if (label === 'Search') return (
                     <li key='search-trigger'>
                         <SearchCommand
-                            renderAs="text"
+                            renderAs="trigger-text"
                             label='Search'
-                            initialStocks={[]}
                         />
                     </li>
                 )

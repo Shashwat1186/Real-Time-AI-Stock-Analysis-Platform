@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { CommandDialog, CommandEmpty, CommandInput, CommandList } from "@/components/ui/command"
 import { Button } from "@/components/ui/button";
 import { Loader2, TrendingUp } from "lucide-react";
@@ -8,27 +8,35 @@ import Link from "next/link";
 import { searchStocks } from "@/lib/actions/finnhub.actions";
 import { useDebounce } from "@/hooks/useDebounce";
 
-export default function SearchCommand({ renderAs = 'button', label = 'Add stock', initialStocks }: SearchCommandProps) {
+export default function SearchCommand({ renderAs = 'button', label = 'Add stock', initialStocks = [] }: SearchCommandProps) {
     const [open, setOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
     const [loading, setLoading] = useState(false)
-    const [defaultStocks, setDefaultStocks] = useState<StockWithWatchlistStatus[]>(initialStocks);
-    const [stocks, setStocks] = useState<StockWithWatchlistStatus[]>(initialStocks);
+    const [defaultStocks, setDefaultStocks] = useState<StockWithWatchlistStatus[]>(initialStocks || []);
+    const [stocks, setStocks] = useState<StockWithWatchlistStatus[]>(initialStocks || []);
 
     const isSearchMode = !!searchTerm.trim();
     const displayStocks = isSearchMode ? stocks : defaultStocks?.slice(0, 10);
 
     useEffect(() => {
+        if (renderAs === 'trigger-text' || renderAs === 'trigger-button') return;
+
         const onKeyDown = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
                 e.preventDefault()
                 setOpen(v => !v)
             }
         }
+        const onOpenSearch = () => setOpen(true);
         window.addEventListener("keydown", onKeyDown)
-        return () => window.removeEventListener("keydown", onKeyDown)
-    }, [])
+        window.addEventListener("open-search", onOpenSearch)
+        return () => {
+            window.removeEventListener("keydown", onKeyDown)
+            window.removeEventListener("open-search", onOpenSearch)
+        }
+    }, [renderAs])
 
+    const requestIdRef = useRef(0);
     const handleSearch = async () => {
         if (!isSearchMode) {
             if (defaultStocks.length === 0) {
@@ -48,20 +56,18 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
             }
             return;
         }
-
+        const requestId = ++requestIdRef.current;
         setLoading(true)
         try {
             const results = await searchStocks(searchTerm.trim());
-            setStocks(results);
+            if (requestId === requestIdRef.current) setStocks(results);
         } catch {
-            setStocks([])
+            if (requestId === requestIdRef.current) setStocks([])
         } finally {
-            setLoading(false)
+            if (requestId === requestIdRef.current) setLoading(false)
         }
     }
-
     const debouncedSearch = useDebounce(handleSearch, 300);
-
     useEffect(() => {
         debouncedSearch();
     }, [searchTerm]);
@@ -72,13 +78,30 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
         setStocks(defaultStocks);
     }
 
+    if (renderAs === 'trigger-text') {
+        return (
+            <span onClick={() => window.dispatchEvent(new Event('open-search'))} className="search-text cursor-pointer">
+                {label}
+            </span>
+        )
+    }
+
+    if (renderAs === 'trigger-button') {
+        return (
+            <Button onClick={() => window.dispatchEvent(new Event('open-search'))} className="search-btn">
+                {label}
+            </Button>
+        )
+    }
+
     return (
         <>
-            {renderAs === 'text' ? (
-                <span onClick={() => setOpen(true)} className="search-text">
+            {renderAs === 'text' && (
+                <span onClick={() => setOpen(true)} className="search-text cursor-pointer">
                     {label}
                 </span>
-            ) : (
+            )}
+            {renderAs === 'button' && (
                 <Button onClick={() => setOpen(true)} className="search-btn">
                     {label}
                 </Button>
