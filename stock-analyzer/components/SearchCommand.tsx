@@ -123,7 +123,7 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
                             {displayStocks?.map((stock, i) => (
                                 <li key={`${stock.symbol}-${i}`} className="search-item">
                                     <Link
-                                        href={`/stocks/${stock.symbol}`}
+                                        href={`/${stock.symbol}`}
                                         onClick={handleSelectStock}
                                         className="search-item-link"
                                     >
