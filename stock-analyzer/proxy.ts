@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     // Manually read the session cookie to avoid importing better-auth Node.js dependencies into Edge Middleware
     const sessionCookie = request.cookies.get("better-auth.session_token") || request.cookies.get("__Secure-better-auth.session_token");
     const url = new URL(request.url);
