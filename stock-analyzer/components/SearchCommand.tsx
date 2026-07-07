@@ -101,11 +101,7 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
                     {label}
                 </span>
             )}
-            {renderAs === 'button' && (
-                <Button onClick={() => setOpen(true)} className="search-btn">
-                    {label}
-                </Button>
-            )}
+
             <CommandDialog open={open} onOpenChange={setOpen} className="search-dialog">
                 <div className="search-field">
                     <CommandInput value={searchTerm} onValueChange={setSearchTerm} placeholder="Search stocks..." className="search-input" />
