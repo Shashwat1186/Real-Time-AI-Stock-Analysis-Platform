@@ -88,30 +88,32 @@ export const sendDailyNewsSummary = inngest.createFunction(
             };
         }
 
-        const results = await step.run("fetch-user-news", async () => {
-            const perUser: Array<{
-                user: UserForNewsEmail;
-                articles: MarketNewsArticle[];
-            }> = [];
-
-            for (const user of users as UserForNewsEmail[]) {
+        const results = await Promise.all(
+            (users as UserForNewsEmail[]).map(async (user) => {
                 try {
-                    const symbols =
-                        await getWatchlistSymbolsByEmail(user.email);
+                    const articles = await step.run(
+                        `fetch-news-${user.id}`,
+                        async () => {
+                            const symbols =
+                                await getWatchlistSymbolsByEmail(user.email);
 
-                    let articles = await getNews(symbols);
+                            let userArticles = await getNews(symbols);
 
-                    articles = (articles || []).slice(0, 6);
+                            userArticles = (userArticles || []).slice(0, 6);
 
-                    if (articles.length === 0) {
-                        articles = await getNews();
-                        articles = (articles || []).slice(0, 6);
-                    }
+                            if (userArticles.length === 0) {
+                                userArticles = await getNews();
+                                userArticles = (userArticles || []).slice(0, 6);
+                            }
 
-                    perUser.push({
+                            return userArticles;
+                        }
+                    );
+
+                    return {
                         user,
-                        articles,
-                    });
+                        articles: articles || [],
+                    };
                 } catch (error) {
                     console.error(
                         "daily-news: error preparing user news",
@@ -119,15 +121,13 @@ export const sendDailyNewsSummary = inngest.createFunction(
                         error
                     );
 
-                    perUser.push({
+                    return {
                         user,
                         articles: [],
-                    });
+                    };
                 }
-            }
-
-            return perUser;
-        });
+            })
+        );
 
         const userNewsSummaries: {
             user: UserForNewsEmail;
@@ -184,21 +184,31 @@ export const sendDailyNewsSummary = inngest.createFunction(
             }
         }
 
-        await step.run("send-news-emails", async () => {
-            return Promise.all(
-                userNewsSummaries.map(
-                    async ({ user, newsContent }) => {
-                        if (!newsContent) return false;
+        await Promise.all(
+            userNewsSummaries.map(async ({ user, newsContent }) => {
+                if (!newsContent) return false;
 
-                        return sendNewsSummaryEmail({
-                            email: user.email,
-                            date: getFormattedTodayDate(),
-                            newsContent,
-                        });
-                    }
-                )
-            );
-        });
+                try {
+                    return await step.run(
+                        `send-news-email-${user.id}`,
+                        async () => {
+                            return sendNewsSummaryEmail({
+                                email: user.email,
+                                date: getFormattedTodayDate(),
+                                newsContent,
+                            });
+                        }
+                    );
+                } catch (error) {
+                    console.error(
+                        "daily-news: error sending news email to",
+                        user.email,
+                        error
+                    );
+                    return false;
+                }
+            })
+        );
 
         return {
             success: true,
