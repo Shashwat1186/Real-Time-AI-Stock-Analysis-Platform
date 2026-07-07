@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
-
 export async function middleware(request: NextRequest) {
-    const sessionCookie = getSessionCookie(request);
+    // Manually read the session cookie to avoid importing better-auth Node.js dependencies into Edge Middleware
+    const sessionCookie = request.cookies.get("better-auth.session_token") || request.cookies.get("__Secure-better-auth.session_token");
     const url = new URL(request.url);
     const isAuthPage = url.pathname === "/sign-in" || url.pathname === "/sign-up";
 
